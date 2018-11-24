@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
         
         printf("%i, %i\n", u,v);
         
-        if (std::find(S[u].begin(),S[u].end(),v) == S[u].end()) {
+        if (std::find(S[u].begin(),S[u].end(),v) != S[u].end()) {
             if (S[u].size() < L) {
                 S[u].push_back(v);
             } else {
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        if (std::find(S[v].begin(),S[v].end(),u) == S[v].end()) {
+        if (std::find(S[v].begin(),S[v].end(),u) != S[v].end()) {
             if (S[v].size() < L) {
                 S[v].push_back(u);
             } else {
@@ -110,17 +110,12 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    for (int u = 0; u < N; u++) {
-        std::sort(S[u].begin(), S[u].end());
-    }
-
-
     // common neighbors calculation (only keep top m)
     int m = 100;
     for (int u = 0; u < N; u++) {
         for (int v = 0; v < N; v++) {
-            //std::sort(S[u].begin(), S[u].end());
-            //std::sort(S[v].begin(), S[v].end());
+            std::sort(S[u].begin(), S[u].end());
+            std::sort(S[v].begin(), S[v].end());
             int intersection = 0;
             int ui = 0;
             int vi = 0;
@@ -143,10 +138,7 @@ int main(int argc, char* argv[]) {
                 C.erase(C.begin() + m);
                 C.push_back(std::make_tuple(cn,u,v));
             }
-
-            if (u % 100 == 0 && v % 100 == 0) {
-                printf("CALC:%i, %i\n", u,v);
-            }
+            printf("CALC:%i, %i\n", u,v);
         }
     }
     
