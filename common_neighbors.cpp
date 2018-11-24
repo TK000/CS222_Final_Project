@@ -20,10 +20,10 @@
 
 #define N 1000 //number of vertices
 
-int L = 10;
+int L = 100;
 
-int l_eta[N];
-int u_eta[N];
+double l_eta[N];
+double u_eta[N];
 
 std::vector<int> S[N];
 
@@ -116,9 +116,9 @@ int main(int argc, char* argv[]) {
 
 
     // common neighbors calculation (only keep top m)
-    int m = 100;
-    for (int u = 0; u < N; u++) {
-        for (int v = 0; v < N; v++) {
+    int m = 10;
+    for (int u = 0; u < N-1; u++) {
+        for (int v = u+1; v < N; v++) {
             //std::sort(S[u].begin(), S[u].end());
             //std::sort(S[v].begin(), S[v].end());
             int intersection = 0;
@@ -135,13 +135,15 @@ int main(int argc, char* argv[]) {
                     vi++;
                 }
             }
-            int max = std::max((float) (l_eta[u] + u_eta[u]) / 2, (float) (l_eta[v] + u_eta[v]) / 2);
+            float max = std::max((float) (l_eta[u] + u_eta[u]) / 2, (float) (l_eta[v] + u_eta[v]) / 2);
             double cn = (float) intersection / max;
             if (C.size() < m) {
                 C.push_back(std::make_tuple(cn,u,v));
+                std::sort(C.rbegin(), C.rend());
             } else if (std::get<0>(C[m-1]) < cn) {
                 C.erase(C.begin() + m);
                 C.push_back(std::make_tuple(cn,u,v));
+                std::sort(C.rbegin(), C.rend());
             }
 
             if (u % 100 == 0 && v % 100 == 0) {
@@ -151,10 +153,17 @@ int main(int argc, char* argv[]) {
     }
     
     // print top m common neighbors
-    for (int i = 0; i < m; i++) {
-        printf("%i,%i\n", std::get<1>(C[i]), std::get<2>(C[i]));
+    for (int i = 0; i < C.size(); i++) {
+        printf("%i,%i,%f\n", std::get<1>(C[i]), std::get<2>(C[i]), std::get<0>(C[i]));
     }
-    
+
+    // debugging
+    for (int u = 0; u < N; u++) {
+        //printf("size:%i\n", S[u].size());
+        /*for (int i = 0; i < S[u].size(); i++) {
+            printf("%i,",S[u][i]);
+        }*/
+    }
     
     // close file
     graph.close();

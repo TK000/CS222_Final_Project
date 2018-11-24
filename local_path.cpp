@@ -20,13 +20,13 @@
 
 #define N 1000 //number of vertices
 
-int L = 10;
+int L = 100;
 double alpha = 0.25;
 
-int Sl_eta[N];
-int Su_eta[N];
-int Tl_eta[N];
-int Tu_eta[N];
+double Sl_eta[N];
+double Su_eta[N];
+double Tl_eta[N];
+double Tu_eta[N];
 
 std::vector<int> S[N];
 std::vector<int> T[N];
@@ -37,7 +37,7 @@ double G(int u) {
 
 std::vector<std::tuple<double, int, int>> C;
 
-void update(std::vector<int> (&S)[N], int (&l_eta)[N], int (&u_eta)[N], int u, int v) {
+void update(std::vector<int> (&S)[N], double (&l_eta)[N], double (&u_eta)[N], int u, int v) {
     if (std::find(S[u].begin(),S[u].end(),v) == S[u].end()) {
         if (S[u].size() < L) {
             S[u].push_back(v);
@@ -81,6 +81,7 @@ int intersection(std::vector<int> (&S)[N], int u, int v) {
             vi++;
         }
     }
+    return i;
 }
 
 
@@ -124,30 +125,51 @@ int main(int argc, char* argv[]) {
     }
 
     // local path calculation (only keep top m)
-    int m = 100;
-    for (int u = 0; u < N; u++) {
-        for (int v = 0; v < N; v++) {
+    int m = 10;
+    for (int u = 0; u < N-1; u++) {
+        for (int v = u+1; v < N; v++) {
             int S_intersection = intersection(S,u,v);
             int T_intersection = intersection(T,u,v);
-            int S_max = std::max((float) (Sl_eta[u] + Su_eta[u]) / 2, (float) (Sl_eta[v] + Su_eta[v]) / 2);
-            int T_max = std::max((float) (Tl_eta[u] + Tu_eta[u]) / 2, (float) (Tl_eta[v] + Tu_eta[v]) / 2);
+            float S_max = std::max((float) (Sl_eta[u] + Su_eta[u]) / 2, (float) (Sl_eta[v] + Su_eta[v]) / 2);
+            float T_max = std::max((float) (Tl_eta[u] + Tu_eta[u]) / 2, (float) (Tl_eta[v] + Tu_eta[v]) / 2);
             double Slp = (float) S_intersection / S_max;
             double Tlp = (float) T_intersection / T_max;
+            double lp = Slp + (double) (alpha*Tlp);
+
             if (C.size() < m) {
+                C.push_back(std::make_tuple(lp,u,v));
+                std::sort(C.rbegin(), C.rend());
+            } else if (std::get<0>(C[m-1]) < lp) {
+                C.erase(C.begin() + m);
+                C.push_back(std::make_tuple(lp,u,v));
+                std::sort(C.rbegin(), C.rend());
+            }
+            /*if (C.size() < m) {
                 C.push_back(std::make_tuple(Slp + alpha*Tlp,u,v));
+                std::sort(C.rbegin(), C.rend());
             } else if (std::get<0>(C[m-1]) < Slp + alpha*Tlp) {
                 C.erase(C.begin() + m);
                 C.push_back(std::make_tuple(Slp + alpha*Tlp,u,v));
+                std::sort(C.rbegin(), C.rend());
+            }*/
+            if (u % 100 == 0 && v % 100 == 0) {
+                printf("CALC:%i, %i\n", u,v);
             }
-            printf("CALC:%i, %i\n", u,v);
         }
     }
     
     // print top m local paths
-    for (int i = 0; i < m; i++) {
-        printf("%i,%i\n", std::get<1>(C[i]), std::get<2>(C[i]));
+    for (int i = 0; i < C.size(); i++) {
+        printf("%i,%i,%f\n", std::get<1>(C[i]), std::get<2>(C[i]), std::get<0>(C[i]));
     }
-    
+
+    // debugging
+    for (int u = 0; u < N; u++) {
+        //printf("size:%i\n", S[u].size());
+        /*for (int i = 0; i < S[u].size(); i++) {
+            printf("%i,",S[u][i]);
+        }*/
+    }
     
     // close file
     graph.close();
