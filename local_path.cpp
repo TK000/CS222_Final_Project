@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <tuple>
 
-#define N 262111 //number of vertices
+#define N 1000 //number of vertices
 
 int L = 10;
 double alpha = 0.25;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
     
     // read in the file
     std::ifstream graph;
-    graph.open("amazon0302.txt");
+    graph.open("Amazon_truncated.txt");
     
     // sketch maintenance and update
     std::string line;
