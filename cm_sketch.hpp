@@ -12,7 +12,8 @@
 
 #endif /* cm_sketch_hpp */
 
-# define P 32749l
+// prime number for hashing
+# define P 2147483647l
 
 // Count-Min sketch for counting vertex degree
 class CMSketch {
