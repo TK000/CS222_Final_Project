@@ -18,9 +18,9 @@
 #include <algorithm>
 #include <tuple>
 
-#define N 1000 //number of vertices
+#define N 1001 //number of vertices
 
-int L = 100;
+int L = 10;
 double alpha = 0.25;
 
 double Sl_eta[N];
@@ -36,6 +36,7 @@ double G(int u) {
 }
 
 std::vector<std::tuple<double, int, int>> C;
+std::vector<std::tuple<int,int>> edges;
 
 void update(std::vector<int> (&S)[N], double (&l_eta)[N], double (&u_eta)[N], int u, int v) {
     if (std::find(S[u].begin(),S[u].end(),v) == S[u].end()) {
@@ -94,7 +95,7 @@ int main(int argc, char* argv[]) {
     
     // read in the file
     std::ifstream graph;
-    graph.open("Amazon_truncated.txt");
+    graph.open("amazon0302.txt");
     
     // sketch maintenance and update
     std::string line;
@@ -103,7 +104,13 @@ int main(int argc, char* argv[]) {
         int u, v;
         if (!(iss >> u >> v)) {
             continue;
+        } else if (u > 1000) {
+            break;
+        } else if (v > 1000) {
+            continue;
         }
+
+        edges.push_back(std::make_tuple(u,v));
         
         printf("%i, %i\n", u,v);
         
@@ -125,35 +132,38 @@ int main(int argc, char* argv[]) {
     }
 
     // local path calculation (only keep top m)
-    int m = 10;
+    int m = 100;
     for (int u = 0; u < N-1; u++) {
         for (int v = u+1; v < N; v++) {
-            int S_intersection = intersection(S,u,v);
-            int T_intersection = intersection(T,u,v);
-            float S_max = std::max((float) (Sl_eta[u] + Su_eta[u]) / 2, (float) (Sl_eta[v] + Su_eta[v]) / 2);
-            float T_max = std::max((float) (Tl_eta[u] + Tu_eta[u]) / 2, (float) (Tl_eta[v] + Tu_eta[v]) / 2);
-            double Slp = (float) S_intersection / S_max;
-            double Tlp = (float) T_intersection / T_max;
-            double lp = Slp + (double) (alpha*Tlp);
+            if (std::find(edges.begin(),edges.end(),std::make_tuple(u,v)) == edges.end()
+                && std::find(edges.begin(),edges.end(),std::make_tuple(v,u)) == edges.end()) {
+                int S_intersection = intersection(S,u,v);
+                int T_intersection = intersection(T,u,v);
+                float S_max = std::max((float) (Sl_eta[u] + Su_eta[u]) / 2, (float) (Sl_eta[v] + Su_eta[v]) / 2);
+                float T_max = std::max((float) (Tl_eta[u] + Tu_eta[u]) / 2, (float) (Tl_eta[v] + Tu_eta[v]) / 2);
+                double Slp = (float) S_intersection / S_max;
+                double Tlp = (float) T_intersection / T_max;
+                double lp = Slp + (double) (alpha*Tlp);
 
-            if (C.size() < m) {
-                C.push_back(std::make_tuple(lp,u,v));
-                std::sort(C.rbegin(), C.rend());
-            } else if (std::get<0>(C[m-1]) < lp) {
-                C.erase(C.begin() + m);
-                C.push_back(std::make_tuple(lp,u,v));
-                std::sort(C.rbegin(), C.rend());
-            }
-            /*if (C.size() < m) {
-                C.push_back(std::make_tuple(Slp + alpha*Tlp,u,v));
-                std::sort(C.rbegin(), C.rend());
-            } else if (std::get<0>(C[m-1]) < Slp + alpha*Tlp) {
-                C.erase(C.begin() + m);
-                C.push_back(std::make_tuple(Slp + alpha*Tlp,u,v));
-                std::sort(C.rbegin(), C.rend());
-            }*/
-            if (u % 100 == 0 && v % 100 == 0) {
-                printf("CALC:%i, %i\n", u,v);
+                if (C.size() < m) {
+                    C.push_back(std::make_tuple(lp,u,v));
+                    std::sort(C.rbegin(), C.rend());
+                } else if (std::get<0>(C[m-1]) < lp) {
+                    C.erase(C.begin() + m);
+                    C.push_back(std::make_tuple(lp,u,v));
+                    std::sort(C.rbegin(), C.rend());
+                }
+                /*if (C.size() < m) {
+                    C.push_back(std::make_tuple(Slp + alpha*Tlp,u,v));
+                    std::sort(C.rbegin(), C.rend());
+                } else if (std::get<0>(C[m-1]) < Slp + alpha*Tlp) {
+                    C.erase(C.begin() + m);
+                    C.push_back(std::make_tuple(Slp + alpha*Tlp,u,v));
+                    std::sort(C.rbegin(), C.rend());
+                }*/
+                if (u % 100 == 0 && v % 100 == 0) {
+                    printf("CALC:%i, %i\n", u,v);
+                }
             }
         }
     }

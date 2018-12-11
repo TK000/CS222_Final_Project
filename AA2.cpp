@@ -25,6 +25,7 @@ int L = 10;
 double l_eta[N];
 double u_eta[N];
 
+std::vector<int> S_inv[N];
 std::vector<int> S[N];
 
 double G(int u) {
@@ -34,6 +35,43 @@ double G(int u) {
 std::vector<std::tuple<double, int, int>> C;
 //int edges[N*N];
 std::vector<std::tuple<int,int>> edges;
+
+double AA(int u, int v, int d_max) {
+    L = d_max;
+    double AA = 0;
+    std::sort(S_inv[u].begin(),S_inv[u].end());
+    std::sort(S_inv[v].begin(),S_inv[v].end());
+    
+    std::vector<int> v_intersection;
+    std::set_intersection(S_inv[u].begin(), S_inv[u].end(),
+                          S_inv[v].begin(), S_inv[v].end(),
+                          std::back_inserter(v_intersection));
+    for(int node : v_intersection)
+        if (l_eta[node] == 1 and u_eta[node] == 1){
+            AA += 1/(log(S[node].size()));
+        }
+    
+    return AA;
+}
+
+double RA(int u, int v, int d_max) {
+    L = d_max;
+    double AA = 0;
+    std::sort(S_inv[u].begin(),S_inv[u].end());
+    std::sort(S_inv[v].begin(),S_inv[v].end());
+    
+    std::vector<int> v_intersection;
+    std::set_intersection(S_inv[u].begin(), S_inv[u].end(),
+                          S_inv[v].begin(), S_inv[v].end(),
+                          std::back_inserter(v_intersection));
+    for(int node : v_intersection)
+        if (l_eta[node] == 1 and u_eta[node] == 1){
+            AA += 1/(S[node].size());
+        }
+    
+    return AA;
+}
+
 
 
 int main(int argc, char* argv[]) {
@@ -66,6 +104,7 @@ int main(int argc, char* argv[]) {
         if (std::find(S[u].begin(),S[u].end(),v) == S[u].end()) {
             if (S[u].size() < L) {
                 S[u].push_back(v);
+                S_inv[v].push_back(u);
             } else {
                 if (G(v) <= l_eta[u]) {
                     int max = 0;
@@ -83,7 +122,9 @@ int main(int argc, char* argv[]) {
                         k_star = v;
                     }
                     S[u].erase(S[u].begin() + k-1);
+                    S_inv[S[u][k]].erase(std::find(S_inv[S[u][k]].begin(), S_inv[S[u][k]].end(), u));
                     S[u].push_back(v);
+                    S_inv[v].push_back(u);
                     u_eta[u] = G(k);
                     l_eta[u] = G(k_star);
                 }
@@ -92,6 +133,7 @@ int main(int argc, char* argv[]) {
         if (std::find(S[v].begin(),S[v].end(),u) == S[v].end()) {
             if (S[v].size() < L) {
                 S[v].push_back(u);
+                S_inv[u].push_back(v);
             } else {
                 if (G(u) <= l_eta[v]) {
                     int max = 0;
@@ -109,7 +151,9 @@ int main(int argc, char* argv[]) {
                         k_star = u;
                     }
                     S[v].erase(S[v].begin() + k-1);
+                    S_inv[S[v][k]].erase(std::find(S_inv[S[v][k]].begin(), S_inv[S[v][k]].end(), v));
                     S[v].push_back(u);
+                    S_inv[u].push_back(v);
                     u_eta[v] = G(k);
                     l_eta[v] = G(k_star);
                 }
@@ -128,22 +172,7 @@ int main(int argc, char* argv[]) {
         for (int v = u+1; v < N; v++) {
             if (std::find(edges.begin(),edges.end(),std::make_tuple(u,v)) == edges.end()
                 && std::find(edges.begin(),edges.end(),std::make_tuple(v,u)) == edges.end()) {
-                int intersection = 0;
-                int ui = 0;
-                int vi = 0;
-                while (ui < S[u].size() && vi < S[v].size()) {
-                    if (S[u][ui] == S[v][vi]) {
-                        intersection++;
-                        ui++;
-                        vi++;
-                    } else if (S[u][ui] < S[v][vi]) {
-                        ui++;
-                    } else {
-                        vi++;
-                    }
-                }
-                float max = std::max((float) (l_eta[u] + u_eta[u]) / 2, (float) (l_eta[v] + u_eta[v]) / 2);
-                double cn = (float) intersection / max;
+                double cn = RA(u,v,L);
                 if (C.size() < m) {
                     C.push_back(std::make_tuple(cn,u,v));
                     std::sort(C.rbegin(), C.rend());
@@ -152,7 +181,7 @@ int main(int argc, char* argv[]) {
                     C.push_back(std::make_tuple(cn,u,v));
                     std::sort(C.rbegin(), C.rend());
                 }
-
+                
                 if (u % 100 == 0 && v % 100 == 0) {
                     printf("CALC:%i, %i\n", u,v);
                 }

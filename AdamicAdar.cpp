@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <tuple>
 
-#define N 1000 //number of vertices
+#define N 1001 //number of vertices
 
 int L;
 
@@ -34,135 +34,8 @@ double G(int u) {
 }
 
 std::vector<std::tuple<double, int, int>> C;
+std::vector<std::tuple<int,int>> edges;
 
-
-int main(int argc, char* argv[]) {
-    
-    // initialization
-    for (int u = 0; u < N; u++) {
-        l_eta[u] = u_eta[u] = 1;
-    }
-    
-    // read in the file
-    std::ifstream graph;
-    graph.open("Amazon_truncated.txt");
-    
-    // sketch maintenance and update
-    std::string line;
-    while (std::getline(graph,line)) {
-        std::istringstream iss(line);
-        int u, v;
-        if (!(iss >> u >> v)) {
-            continue;
-        }
-        
-        printf("%i, %i\n", u,v);
-        
-        if (std::find(S[u].begin(),S[u].end(),v) == S[u].end()) {
-            if (S[u].size() < L) {
-                S[u].push_back(v);
-                S_inv[v].push_back(u);
-            } else {
-                if (G(v) <= l_eta[u]) {
-                    int max = 0;
-                    int max_2 = 0;
-                    int k, k_star;
-                    for (int w = 0; w < S[u].size(); w++) {
-                        if (G(w) > max) {
-                            max_2 = max;
-                            max = G(w);
-                            k_star = k;
-                            k = w;
-                        }
-                    }
-                    if (G(v) > G(k_star)) {
-                        k_star = v;
-                    }
-                    S[u].erase(S[u].begin() + k-1);
-                    S_inv[S[u].begin() + k-1].erase(u);
-                    
-                    S[u].push_back(v);
-                    S_inv[v].push_back(u);
-                    u_eta[u] = G(k);
-                    l_eta[u] = G(k_star);
-                }
-            }
-        }
-        if (std::find(S[v].begin(),S[v].end(),u) == S[v].end()) {
-            if (S[v].size() < L) {
-                S[v].push_back(u);
-                S_inv[v].push_back(u);
-            } else {
-                if (G(u) <= l_eta[v]) {
-                    int max = 0;
-                    int max_2 = 0;
-                    int k, k_star;
-                    for (int w = 0; w < S[v].size(); w++) {
-                        if (G(w) > max) {
-                            max_2 = max;
-                            max = G(w);
-                            k_star = k;
-                            k = w;
-                        }
-                    }
-                    if (G(u) > G(k_star)) {
-                        k_star = u;
-                    }
-                    S[v].erase(S[v].begin() + k-1);
-                    S_inv[S[u].begin() + k-1].erase(u);
-                    
-                    S[v].push_back(u);
-                    S_inv[v].push_back(u);
-                    u_eta[v] = G(k);
-                    l_eta[v] = G(k_star);
-                }
-            }
-        }
-    }
-    
-    for (int u = 0; u < N; u++) {
-        std::sort(S[u].begin(), S[u].end());
-    }
-    
-    
-    // common neighbors calculation (only keep top m)
-    int m = 10;
-    for (int u = 0; u < N-1; u++) {
-        for (int v = u+1; v < N; v++) {
-            //std::sort(S[u].begin(), S[u].end());
-            //std::sort(S[v].begin(), S[v].end());
-            int intersection = 0;
-            int ui = 0;
-            int vi = 0;
-            while (ui < S[u].size() && vi < S[v].size()) {
-                if (S[u][ui] == S[v][vi]) {
-                    intersection++;
-                    ui++;
-                    vi++;
-                } else if (S[u][ui] < S[v][vi]) {
-                    ui++;
-                } else {
-                    vi++;
-                }
-            }
-            float max = std::max((float) (l_eta[u] + u_eta[u]) / 2, (float) (l_eta[v] + u_eta[v]) / 2);
-            double cn = (float) intersection / max;
-            if (C.size() < m) {
-                C.push_back(std::make_tuple(cn,u,v));
-                std::sort(C.rbegin(), C.rend());
-            } else if (std::get<0>(C[m-1]) < cn) {
-                C.erase(C.begin() + m);
-                C.push_back(std::make_tuple(cn,u,v));
-                std::sort(C.rbegin(), C.rend());
-            }
-            
-            if (u % 100 == 0 && v % 100 == 0) {
-                printf("CALC:%i, %i\n", u,v);
-            }
-        }
-    }
-    
-}
 double AA(int u, int v, int d_max) {
     L = d_max;
     double AA = 0;
@@ -198,3 +71,138 @@ double RA(int u, int v, int d_max) {
     
     return AA;
 }
+
+
+int main(int argc, char* argv[]) {
+    
+    // initialization
+    for (int u = 0; u < N; u++) {
+        l_eta[u] = u_eta[u] = 1;
+    }
+    
+    // read in the file
+    std::ifstream graph;
+    graph.open("amazon0302.txt");
+    
+    // sketch maintenance and update
+    std::string line;
+    while (std::getline(graph,line)) {
+        std::istringstream iss(line);
+        int u, v;
+        if (!(iss >> u >> v)) {
+            continue;
+        } else if (u > 1000) {
+            break;
+        } else if (v > 1000) {
+            continue;
+        }
+        
+        edges.push_back(std::make_tuple(u,v));
+        printf("%i, %i\n", u,v);
+
+        printf("DEBUG\n");
+        
+        if (std::find(S[u].begin(),S[u].end(),v) == S[u].end()) {
+            printf("DEBUG1\n");
+            if (S[u].size() < L) {
+                S[u].push_back(v);
+                printf("DEBUG2\n");
+                //S_inv[v].push_back(u);
+                printf("DEBUG3\n");
+            } else {
+                printf("DEBUG4\n");
+                if (G(v) <= l_eta[u]) {
+                    int max = 0;
+                    int max_2 = 0;
+                    int k, k_star;
+                    for (int w = 0; w < S[u].size(); w++) {
+                        if (G(w) > max) {
+                            max_2 = max;
+                            max = G(w);
+                            k_star = k;
+                            k = w;
+                        }
+                    }
+                    if (G(v) > G(k_star)) {
+                        k_star = v;
+                    }
+                    printf("DEBUG9\n");
+                    S[u].erase(S[u].begin() + k-1);
+                    printf("DEBUG7\n");
+                    printf("DEBUG7\n");
+                    //S_inv[k].erase(std::find(S_inv[k].begin(), S_inv[k].end(), u));
+                    
+
+                    
+                    S[u].push_back(v);
+                    //S_inv[v].push_back(u);
+                    u_eta[u] = G(k);
+                    l_eta[u] = G(k_star);
+                }
+                printf("DEBUG8\n");
+            }
+        }
+        if (std::find(S[v].begin(),S[v].end(),u) == S[v].end()) {
+            if (S[v].size() < L) {
+                S[v].push_back(u);
+                //S_inv[v].push_back(u);
+            } else {
+                if (G(u) <= l_eta[v]) {
+                    int max = 0;
+                    int max_2 = 0;
+                    int k, k_star;
+                    for (int w = 0; w < S[v].size(); w++) {
+                        if (G(w) > max) {
+                            max_2 = max;
+                            max = G(w);
+                            k_star = k;
+                            k = w;
+                        }
+                    }
+                    if (G(u) > G(k_star)) {
+                        k_star = u;
+                    }
+                    S[v].erase(S[v].begin() + k-1);
+                    //S_inv[k].erase(std::find(S_inv[k].begin(), S_inv[k].end(), u));
+                    
+                    S[v].push_back(u);
+                    //S_inv[v].push_back(u);
+                    u_eta[v] = G(k);
+                    l_eta[v] = G(k_star);
+                }
+            }
+        }
+    }
+
+    printf("DONE\n");
+    
+    for (int u = 0; u < N; u++) {
+        std::sort(S[u].begin(), S[u].end());
+    }
+    
+    
+    // common neighbors calculation (only keep top m)
+    int m = 100;
+    for (int u = 0; u < N-1; u++) {
+        for (int v = u+1; v < N; v++) {
+            if (std::find(edges.begin(),edges.end(),std::make_tuple(u,v)) == edges.end()
+                && std::find(edges.begin(),edges.end(),std::make_tuple(v,u)) == edges.end()) {
+                double cn = AA(u,v,L);
+                if (C.size() < m) {
+                    C.push_back(std::make_tuple(cn,u,v));
+                    std::sort(C.rbegin(), C.rend());
+                } else if (std::get<0>(C[m-1]) < cn) {
+                    C.erase(C.begin() + m);
+                    C.push_back(std::make_tuple(cn,u,v));
+                    std::sort(C.rbegin(), C.rend());
+                }
+                
+                if (u % 100 == 0 && v % 100 == 0) {
+                    printf("CALC:%i, %i\n", u,v);
+                }
+            }
+        }
+    }
+    
+}
+
