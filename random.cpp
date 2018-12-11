@@ -18,34 +18,21 @@
 #include <algorithm>
 #include <tuple>
 
-std::vector<std::tuple<int,int>> pred_e;
+#define N 1001 //number of vertices
+
+
+std::vector<std::tuple<int,int>> edges;
 
 
 int main(int argc, char* argv[]) {
     
-    // initialization
-    std::ifstream preds;
-    preds.open("output.txt");
-    std::string line;
-    while (std::getline(preds,line)) {
-        std::istringstream iss(line);
-        int u, v;
-        float f;
-        if (!(iss >> u >> v >> f)) {
-            continue;
-        }
-        pred_e.push_back(std::make_tuple(u,v));
-    }
-    preds.close();
-
     
     // read in the file
     std::ifstream graph;
-    graph.open("amazon0601.txt");
-    int count = 0;
+    graph.open("amazon0302.txt");
     
     // sketch maintenance and update
-    //std::string line;
+    std::string line;
     while (std::getline(graph,line)) {
         std::istringstream iss(line);
         int u, v;
@@ -56,18 +43,31 @@ int main(int argc, char* argv[]) {
         } else if (v > 1000) {
             continue;
         }
-
-        if (std::find(pred_e.begin(),pred_e.end(),std::make_tuple(u,v)) != pred_e.end()) {
-            count+= 1;
-        } else if (std::find(pred_e.begin(),pred_e.end(),std::make_tuple(v,u)) != pred_e.end()) {
-            count += 1;
-        }
-    }
         
+        //printf("%i, %i\n", u,v);
+        edges.push_back(std::make_tuple(u,v));
+    }
+
+    int count = 0;
+    srand(time(0));
+    while (count < 100) {
+        int u = rand() % 1000 + 1;
+        int v = rand() % 1000 + 1;
+        if (u == v) {
+            continue;
+        }
+        if (std::find(edges.begin(),edges.end(),std::make_tuple(u,v)) != edges.end()) {
+            continue;
+        }
+        if (std::find(edges.begin(),edges.end(),std::make_tuple(v,u)) != edges.end()) {
+            continue;
+        }
+        printf("%i %i 0.0\n",u,v);
+        count += 1;
+    }
     
     // close file
     graph.close();
-    printf("%i\n",count);
     return 0;
     
 }

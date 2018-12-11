@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
         for (int v = u+1; v < N; v++) {
             if (std::find(edges.begin(),edges.end(),std::make_tuple(u,v)) == edges.end()
                 && std::find(edges.begin(),edges.end(),std::make_tuple(v,u)) == edges.end()) {
-                double cn = RA(u,v,L);
+                double cn = AA(u,v,L);
                 if (C.size() < m) {
                     C.push_back(std::make_tuple(cn,u,v));
                     std::sort(C.rbegin(), C.rend());
@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
     
     // print top m common neighbors
     for (int i = 0; i < C.size(); i++) {
-        printf("%i,%i,%f\n", std::get<1>(C[i]), std::get<2>(C[i]), std::get<0>(C[i]));
+        printf("%i %i %f\n", std::get<1>(C[i]), std::get<2>(C[i]), std::get<0>(C[i]));
     }
 
     // debugging

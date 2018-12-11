@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
     
     // print top m local paths
     for (int i = 0; i < C.size(); i++) {
-        printf("%i,%i,%f\n", std::get<1>(C[i]), std::get<2>(C[i]), std::get<0>(C[i]));
+        printf("%i %i %f\n", std::get<1>(C[i]), std::get<2>(C[i]), std::get<0>(C[i]));
     }
 
     // debugging
