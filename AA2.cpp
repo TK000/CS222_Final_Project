@@ -48,7 +48,9 @@ double AA(int u, int v, int d_max) {
                           std::back_inserter(v_intersection));
     for(int node : v_intersection)
         if (l_eta[node] == 1 and u_eta[node] == 1){
-            AA += 1/(log(S[node].size()));
+            if (S[node].size() > 0){
+                AA += 1/(log(S[node].size()));
+            }
         }
     
     return AA;
@@ -56,7 +58,7 @@ double AA(int u, int v, int d_max) {
 
 double RA(int u, int v, int d_max) {
     L = d_max;
-    double AA = 0;
+    double RA = 0;
     std::sort(S_inv[u].begin(),S_inv[u].end());
     std::sort(S_inv[v].begin(),S_inv[v].end());
     
@@ -66,10 +68,12 @@ double RA(int u, int v, int d_max) {
                           std::back_inserter(v_intersection));
     for(int node : v_intersection)
         if (l_eta[node] == 1 and u_eta[node] == 1){
-            AA += 1/(S[node].size());
+            if (S[node].size() > 0){
+                RA += 1/(S[node].size());
+            }
         }
     
-    return AA;
+    return RA;
 }
 
 
