@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     
     // read in the file
     std::ifstream graph;
-    graph.open("amazon0302.txt");
+    graph.open("amazon0601.txt");
     int count = 0;
     
     // sketch maintenance and update
