@@ -49,7 +49,7 @@ double AA(int u, int v, int d_max) {
     for(int node : v_intersection)
         if (l_eta[node] == 1 and u_eta[node] == 1){
             if (S[node].size() > 0){
-                AA += 1/(log(S[node].size()));
+                AA += (double) 1/(log(S[node].size()));
             }
         }
     
@@ -69,7 +69,8 @@ double RA(int u, int v, int d_max) {
     for(int node : v_intersection)
         if (l_eta[node] == 1 and u_eta[node] == 1){
             if (S[node].size() > 0){
-                RA += 1/(S[node].size());
+                RA += (double) 1/(S[node].size());
+                //printf("RA:%f\n",RA);
             }
         }
     
